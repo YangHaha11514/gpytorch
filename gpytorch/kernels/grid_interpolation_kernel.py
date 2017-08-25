@@ -2,7 +2,7 @@ import torch
 from torch.autograd import Variable
 from .kernel import Kernel
 from gpytorch.utils.interpolation import Interpolation
-from gpytorch.lazy import ToeplitzLazyVariable
+from gpytorch.lazy import ToeplitzLazyVariable, KroneckerProductLazyVariable
 
 
 class GridInterpolationKernel(Kernel):
@@ -14,15 +14,12 @@ class GridInterpolationKernel(Kernel):
     def initialize_interpolation_grid(self, grid_size, grid_bounds):
         super(GridInterpolationKernel, self).initialize_interpolation_grid(grid_size, grid_bounds)
         grid = torch.linspace(grid_bounds[0], grid_bounds[1], grid_size - 2)
-
         grid_diff = grid[1] - grid[0]
-
         self.grid_size = grid_size
         self.grid_bounds = grid_bounds
         self.grid = Variable(torch.linspace(grid_bounds[0] - grid_diff,
                                             grid_bounds[1] + grid_diff,
                                             grid_size))
-
         return self
 
     def forward(self, x1, x2, **kwargs):
