@@ -39,9 +39,9 @@ class KroneckerProductLazyVariable(LazyVariable):
         else:
             raise AttributeError('Invalid number of arguments')
 
-    def _derivative_quadratic_form_factory(*args):
+    def _derivative_quadratic_form_factory(self, *args):
         columns, = args
-        return lambda left_vector, right_vector: (kp_sym_toeplitz_derivative_quadratic_form(left_vector, right_vector),)
+        return lambda left_vector, right_vector: (kp_sym_toeplitz_derivative_quadratic_form(columns, left_vector, right_vector),)
 
     def add_diag(self, diag):
         if self.J_lefts is not None:
@@ -168,8 +168,11 @@ class KroneckerProductLazyVariable(LazyVariable):
         Returns:
             - KroneckerProductLazyVariable with columns[0] = columns[0]*(constant) and columns[i] = columns[i] for i>0
         """
-        columns = self.columns.clone()
-        columns[0] = columns[0].mul(constant)
+        columns = self.columns
+        constant_tensor = torch.zeros(columns.size()) + 1
+        constant_tensor[0] = constant_tensor[0] * constant.data
+        constant_variable = Variable(constant_tensor)
+        columns = columns * constant_variable
         return KroneckerProductLazyVariable(columns, self.J_lefts, self.C_lefts,
                                             self.J_rights, self.C_rights, self.added_diag)
 
@@ -208,10 +211,10 @@ class KroneckerProductLazyVariable(LazyVariable):
         return self.columns, W_left, W_right, added_diag
 
     def trace_log_det_quad_form(self, mu_diffs, chol_covar_1, num_samples):
-        if self.J_left is None and self.J_right is None:
+        if self.J_lefts is None and self.J_rights is None:
             return super(KroneckerProductLazyVariable, self).trace_log_det_quad_form(mu_diffs, chol_covar_1, num_samples)
         else:
-            return ToeplitzLazyVariable(self.c).trace_log_det_quad_form(mu_diffs, chol_covar_1, num_samples)
+            return KroneckerProductLazyVariable(self.columns).trace_log_det_quad_form(mu_diffs, chol_covar_1, num_samples)
 
     def exact_posterior_alpha(self, train_mean, train_y):
         train_residual = (train_y - train_mean).unsqueeze(1)

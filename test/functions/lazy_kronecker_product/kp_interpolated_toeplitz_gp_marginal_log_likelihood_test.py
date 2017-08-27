@@ -17,7 +17,7 @@ def test_kp_toeplitz_gp_marginal_log_likelihood_forward():
     rbf_module = RBFKernel()
     rbf_module.initialize(log_lengthscale=-2)
     covar_module = GridInterpolationKernel(rbf_module)
-    covar_module.initialize_interpolation_grid(5)
+    covar_module.initialize_interpolation_grid(5, [(0, 1), (0, 1), (0, 1)])
 
     covar_xs = []
     cs = torch.zeros(3, covar_module.forward(x[0].unsqueeze(1), x[0].unsqueeze(1)).c.data.size()[0])
@@ -66,7 +66,7 @@ def test_kp_toeplitz_gp_marginal_log_likelihood_backward():
     rbf_module = RBFKernel()
     rbf_module.initialize(log_lengthscale=-2)
     covar_module = GridInterpolationKernel(rbf_module)
-    covar_module.initialize_interpolation_grid(5)
+    covar_module.initialize_interpolation_grid(5, [(0, 1), (0, 1)])
     noise = Variable(torch.Tensor([1e-4]), requires_grad=True)
 
     covar_xs = []

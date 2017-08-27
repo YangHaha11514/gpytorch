@@ -20,7 +20,7 @@ class Model(gpytorch.GPModel):
         self.mean_module = ConstantMean(constant_bounds=(-1, 1))
         covar_module = RBFKernel()
         self.grid_covar_module = GridInterpolationKernel(covar_module)
-        self.initialize_interpolation_grid(10)
+        self.initialize_interpolation_grid(10, [(0, 1), (0, 1)])
 
     def forward(self, x):
         mean_x = self.mean_module(x)

@@ -32,7 +32,7 @@ class ToeplitzLazyVariable(LazyVariable):
         else:
             raise AttributeError('Invalid number of arguments')
 
-    def _derivative_quadratic_form_factory(*args):
+    def _derivative_quadratic_form_factory(self, *args):
         return lambda left_vector, right_vector: (sym_toeplitz_derivative_quadratic_form(left_vector, right_vector),)
 
     def add_diag(self, diag):
